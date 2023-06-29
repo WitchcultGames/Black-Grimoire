@@ -1,12 +1,10 @@
-
 use std::f32;
 
-use fnv::FnvHashMap;
-use super::super::{Entity};
-use super::transformation::TransformationSystem;
+use super::super::Entity;
 use super::health::HealthSystem;
+use super::transformation::TransformationSystem;
+use fnv::FnvHashMap;
 use gamemath::Vec3;
-
 
 pub struct RigidBodySystem {
     timer: (f32, f32),
@@ -46,16 +44,21 @@ struct RigidBody {
 }
 
 impl RigidBody {
-    pub fn colliding(&self, other: &RigidBody,
-                     positions: (Vec3<f32>, Vec3<f32>)) -> Option<CollisionManifold> {
+    pub fn colliding(
+        &self,
+        other: &RigidBody,
+        positions: (Vec3<f32>, Vec3<f32>),
+    ) -> Option<CollisionManifold> {
         let _s_min = positions.0 - self.extents;
         let _s_max = positions.0 + self.extents;
         let _o_min = positions.1 - other.extents;
         let _o_max = positions.1 + other.extents;
         let direction = positions.1 - positions.0;
-        let overlap = Vec3::new(self.extents.x + other.extents.x - direction.x.abs(),
-                                    self.extents.y + other.extents.y - direction.y.abs(),
-                                    self.extents.z + other.extents.z - direction.z.abs());
+        let overlap = Vec3::new(
+            self.extents.x + other.extents.x - direction.x.abs(),
+            self.extents.y + other.extents.y - direction.y.abs(),
+            self.extents.z + other.extents.z - direction.z.abs(),
+        );
 
         if overlap.x > 0.0 && overlap.y > 0.0 && overlap.z > 0.0 {
             let mut manifold = CollisionManifold {
@@ -194,10 +197,12 @@ impl RigidBodySystem {
         }
     }
 
-    pub fn add_rigid_body_to_entity(&mut self,
-                                    entity: &Entity,
-                                    collider_builder: RigidBodyBuilder,
-                                    transformation_system: &TransformationSystem) {
+    pub fn add_rigid_body_to_entity(
+        &mut self,
+        entity: &Entity,
+        collider_builder: RigidBodyBuilder,
+        transformation_system: &TransformationSystem,
+    ) {
         match self.map.contains_key(entity) {
             true => (), //TODO: Add error logging/printing here!
             false => {
@@ -205,10 +210,10 @@ impl RigidBodySystem {
                     true => {
                         self.rigid_bodies.push(collider_builder.build(*entity));
                         self.map.insert(entity.clone(), self.rigid_bodies.len() - 1);
-                    },
+                    }
                     false => (), //TODO: Add error logging/printing here!
                 }
-            },
+            }
         }
     }
 
@@ -225,7 +230,7 @@ impl RigidBodySystem {
                     if self.rigid_bodies.is_empty() == false {
                         swapped = (true, *index);
                     }
-                },
+                }
                 None => (),
             }
         }
@@ -235,7 +240,10 @@ impl RigidBodySystem {
         }
 
         if swapped.0 == true && swapped.1 != self.rigid_bodies.len() {
-            *self.map.get_mut(&self.rigid_bodies[swapped.1].owner).unwrap() = swapped.1;
+            *self
+                .map
+                .get_mut(&self.rigid_bodies[swapped.1].owner)
+                .unwrap() = swapped.1;
         }
     }
 
@@ -258,7 +266,7 @@ impl RigidBodySystem {
         match self.map.get(entity) {
             Some(index) => {
                 self.rigid_bodies[*index].locomotion = locomotion;
-            },
+            }
             None => (),
         }
     }
@@ -276,7 +284,7 @@ impl RigidBodySystem {
         match self.map.get(entity) {
             Some(index) => {
                 self.rigid_bodies[*index].velocity += force;
-            },
+            }
             None => (),
         }
     }
@@ -289,7 +297,7 @@ impl RigidBodySystem {
                 if velocity.y < force {
                     velocity.y = force;
                 }
-            },
+            }
             None => (),
         }
     }
@@ -298,7 +306,7 @@ impl RigidBodySystem {
         match self.map.get(entity) {
             Some(index) => {
                 self.rigid_bodies[*index].velocity = velocity;
-            },
+            }
             None => (),
         }
     }
@@ -315,17 +323,24 @@ impl RigidBodySystem {
     }
 
     //ray(origin, direction)
-    pub fn ray_cast(&self,
-                    ray: (Vec3<f32>, Vec3<f32>),
-                    transformation_system: &TransformationSystem,
-                    user: Entity) -> Option<(f32, Entity)> {
+    pub fn ray_cast(
+        &self,
+        ray: (Vec3<f32>, Vec3<f32>),
+        transformation_system: &TransformationSystem,
+        user: Entity,
+    ) -> Option<(f32, Entity)> {
         let inv = Vec3::new(1.0 / ray.1.x, 1.0 / ray.1.y, 1.0 / ray.1.z);
         let mut result = None;
 
         for collider in self.rigid_bodies.iter() {
-            let aabb = (transformation_system.get_position(&collider.owner).unwrap(), collider.extents);
+            let aabb = (
+                transformation_system.get_position(&collider.owner).unwrap(),
+                collider.extents,
+            );
 
-            if collider.owner != user && RigidBodySystem::ray_vs_aabb_intersecting(&aabb, (&ray.0, &ray.1, &inv)) == true {
+            if collider.owner != user
+                && RigidBodySystem::ray_vs_aabb_intersecting(&aabb, (&ray.0, &ray.1, &inv)) == true
+            {
                 match result {
                     None => result = Some(((aabb.0 - ray.0).length_squared(), collider.owner)),
                     Some(r) => {
@@ -334,7 +349,7 @@ impl RigidBodySystem {
                         if distance < r.0 {
                             result = Some((distance, collider.owner));
                         }
-                    },
+                    }
                 }
             }
         }
@@ -343,7 +358,10 @@ impl RigidBodySystem {
     }
 
     //aabb: (position, extents), ray: (origin, direction, direction_inverse)
-    pub fn ray_vs_aabb_intersecting(aabb: &(Vec3<f32>, Vec3<f32>), ray: (&Vec3<f32>, &Vec3<f32>, &Vec3<f32>)) -> bool {
+    pub fn ray_vs_aabb_intersecting(
+        aabb: &(Vec3<f32>, Vec3<f32>),
+        ray: (&Vec3<f32>, &Vec3<f32>, &Vec3<f32>),
+    ) -> bool {
         let t1 = ((aabb.0.x - aabb.1.x) - ray.0.x) * ray.2.x;
         let t2 = ((aabb.0.x + aabb.1.x) - ray.0.x) * ray.2.x;
         let tmin = t1.min(t2);
@@ -359,10 +377,17 @@ impl RigidBodySystem {
         tmax > tmin.max(0.0)
     }
 
-    pub fn update_colliders(&mut self, first: usize, last: usize, transformation_system: &mut TransformationSystem) {
+    pub fn update_colliders(
+        &mut self,
+        first: usize,
+        last: usize,
+        transformation_system: &mut TransformationSystem,
+    ) {
         for i in first..last {
             let mut collider = &mut self.rigid_bodies[i];
-            let pos = transformation_system.get_position_mut(&collider.owner).unwrap();
+            let pos = transformation_system
+                .get_position_mut(&collider.owner)
+                .unwrap();
 
             if collider.inv_mass > 0.0 && collider.gravity_immune == false {
                 collider.velocity += self.gravity * self.timer.1;
@@ -374,7 +399,12 @@ impl RigidBodySystem {
         }
     }
 
-    pub fn update(&mut self, dt: f32, transformation_system: &mut TransformationSystem, health_system: &mut HealthSystem) {
+    pub fn update(
+        &mut self,
+        dt: f32,
+        transformation_system: &mut TransformationSystem,
+        health_system: &mut HealthSystem,
+    ) {
         self.timer.0 += dt;
 
         let count = self.rigid_bodies.len();
@@ -400,29 +430,46 @@ impl RigidBodySystem {
             //
 
             for i in 0..(self.rigid_bodies.len() - 1) {
-                let position_1 = transformation_system.get_position(&self.rigid_bodies[i].owner).unwrap() + self.rigid_bodies[i].offset;
+                let position_1 = transformation_system
+                    .get_position(&self.rigid_bodies[i].owner)
+                    .unwrap()
+                    + self.rigid_bodies[i].offset;
 
                 for j in (i + 1)..self.rigid_bodies.len() {
-                    if self.rigid_bodies[i].inv_mass != 0.0 || self.rigid_bodies[j].inv_mass != 0.0 {
-                        let position_2 = transformation_system.get_position(&self.rigid_bodies[j].owner).unwrap() + self.rigid_bodies[j].offset;
+                    if self.rigid_bodies[i].inv_mass != 0.0 || self.rigid_bodies[j].inv_mass != 0.0
+                    {
+                        let position_2 = transformation_system
+                            .get_position(&self.rigid_bodies[j].owner)
+                            .unwrap()
+                            + self.rigid_bodies[j].offset;
 
-                        match self.rigid_bodies[i].colliding(&self.rigid_bodies[j], (position_1, position_2)) {
+                        match self.rigid_bodies[i]
+                            .colliding(&self.rigid_bodies[j], (position_1, position_2))
+                        {
                             Some(manifold) => {
-                                if self.rigid_bodies[i].inv_mass == 0.0 && manifold.normal == Vec3::new(0.0, 1.0, 0.0) {
+                                if self.rigid_bodies[i].inv_mass == 0.0
+                                    && manifold.normal == Vec3::new(0.0, 1.0, 0.0)
+                                {
                                     self.rigid_bodies[j].foothold = true;
-                                } else if self.rigid_bodies[j].inv_mass == 0.0 && manifold.normal == Vec3::new(0.0, -1.0, 0.0) {
+                                } else if self.rigid_bodies[j].inv_mass == 0.0
+                                    && manifold.normal == Vec3::new(0.0, -1.0, 0.0)
+                                {
                                     self.rigid_bodies[i].foothold = true;
                                 }
 
-                                let rv = self.rigid_bodies[j].velocity - self.rigid_bodies[i].velocity;
+                                let rv =
+                                    self.rigid_bodies[j].velocity - self.rigid_bodies[i].velocity;
                                 let normal_vel = rv.dot(manifold.normal);
-                                let masses = (self.rigid_bodies[i].inv_mass, self.rigid_bodies[j].inv_mass);
+                                let masses =
+                                    (self.rigid_bodies[i].inv_mass, self.rigid_bodies[j].inv_mass);
 
                                 if normal_vel > 0.0 {
                                     continue;
                                 }
 
-                                let e = self.rigid_bodies[i].elasticity.max(self.rigid_bodies[j].elasticity);
+                                let e = self.rigid_bodies[i]
+                                    .elasticity
+                                    .max(self.rigid_bodies[j].elasticity);
 
                                 let mut normal_magnitude = -(1.0 + e) * normal_vel;
                                 normal_magnitude /= masses.0 + masses.1;
@@ -433,28 +480,44 @@ impl RigidBodySystem {
                                 self.rigid_bodies[j].velocity += impulse * masses.1;
 
                                 let mass_factor = 1.0 / (masses.0 + masses.1);
-                                let corrections = (manifold.normal * mass_factor * masses.0 * manifold.penetration,
-                                                   manifold.normal * mass_factor * masses.1 * manifold.penetration);
+                                let corrections = (
+                                    manifold.normal * mass_factor * masses.0 * manifold.penetration,
+                                    manifold.normal * mass_factor * masses.1 * manifold.penetration,
+                                );
 
-                                *transformation_system.get_position_mut(&self.rigid_bodies[i].owner).unwrap() -= corrections.0;
-                                *transformation_system.get_position_mut(&self.rigid_bodies[j].owner).unwrap() += corrections.1;
+                                *transformation_system
+                                    .get_position_mut(&self.rigid_bodies[i].owner)
+                                    .unwrap() -= corrections.0;
+                                *transformation_system
+                                    .get_position_mut(&self.rigid_bodies[j].owner)
+                                    .unwrap() += corrections.1;
 
-                                if health_system.entity_has_health(&self.rigid_bodies[i].owner) == true {
-                                    health_system.harm(&self.rigid_bodies[i].owner, self.rigid_bodies[j].damage);
+                                if health_system.entity_has_health(&self.rigid_bodies[i].owner)
+                                    == true
+                                {
+                                    health_system.harm(
+                                        &self.rigid_bodies[i].owner,
+                                        self.rigid_bodies[j].damage,
+                                    );
 
                                     if self.rigid_bodies[i].die_on_collision == true {
                                         health_system.kill_entity(&self.rigid_bodies[i].owner);
                                     }
                                 }
 
-                                if health_system.entity_has_health(&self.rigid_bodies[j].owner) == true {
-                                    health_system.harm(&self.rigid_bodies[j].owner, self.rigid_bodies[i].damage);
+                                if health_system.entity_has_health(&self.rigid_bodies[j].owner)
+                                    == true
+                                {
+                                    health_system.harm(
+                                        &self.rigid_bodies[j].owner,
+                                        self.rigid_bodies[i].damage,
+                                    );
 
                                     if self.rigid_bodies[j].die_on_collision == true {
                                         health_system.kill_entity(&self.rigid_bodies[j].owner);
                                     }
                                 }
-                            },
+                            }
                             None => (),
                         }
                     }

@@ -1,7 +1,7 @@
-use std;
-use gl;
-use core::ffi::c_void;
 use crate::renderer::Vertex;
+use core::ffi::c_void;
+use gl;
+use std;
 
 pub struct Model {
     vao: gl::types::GLuint,
@@ -18,9 +18,11 @@ pub struct ModelInfo {
 }
 
 impl Model {
-    pub fn new(render_mode: gl::types::GLenum,
-               verticies: &[Vertex],
-               indices: &[gl::types::GLuint]) -> Model {
+    pub fn new(
+        render_mode: gl::types::GLenum,
+        verticies: &[Vertex],
+        indices: &[gl::types::GLuint],
+    ) -> Model {
         let mut vao = 0;
         let mut vbo = 0;
         let mut ibo = 0;
@@ -31,46 +33,51 @@ impl Model {
 
             gl::GenBuffers(1, &mut vbo);
             gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(gl::ARRAY_BUFFER,
-                           (verticies.len()
-                            * std::mem::size_of::<Vertex>()) as gl::types::GLsizeiptr,
-                           std::mem::transmute(&verticies[0]),
-                           gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (verticies.len() * std::mem::size_of::<Vertex>()) as gl::types::GLsizeiptr,
+                std::mem::transmute(&verticies[0]),
+                gl::STATIC_DRAW,
+            );
 
             gl::GenBuffers(1, &mut ibo);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
-            gl::BufferData(gl::ELEMENT_ARRAY_BUFFER,
-                           (indices.len()
-                            * std::mem::size_of::<gl::types::GLuint>()) as gl::types::GLsizeiptr,
-                           std::mem::transmute(&indices[0]),
-                           gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ELEMENT_ARRAY_BUFFER,
+                (indices.len() * std::mem::size_of::<gl::types::GLuint>()) as gl::types::GLsizeiptr,
+                std::mem::transmute(&indices[0]),
+                gl::STATIC_DRAW,
+            );
 
             gl::EnableVertexAttribArray(0);
-            gl::VertexAttribPointer(0,
-                                    3,
-                                    gl::FLOAT,
-                                    gl::FALSE as gl::types::GLboolean,
-                                    std::mem::size_of::<Vertex>() as gl::types::GLsizei,
-                                    (std::ptr::null() as *const c_void)
-                                        .offset(offset_of!(Vertex, position) as isize));
+            gl::VertexAttribPointer(
+                0,
+                3,
+                gl::FLOAT,
+                gl::FALSE as gl::types::GLboolean,
+                std::mem::size_of::<Vertex>() as gl::types::GLsizei,
+                (std::ptr::null() as *const c_void).offset(offset_of!(Vertex, position) as isize),
+            );
 
             gl::EnableVertexAttribArray(1);
-            gl::VertexAttribPointer(1,
-                                    3,
-                                    gl::FLOAT,
-                                    gl::FALSE as gl::types::GLboolean,
-                                    std::mem::size_of::<Vertex>() as gl::types::GLsizei,
-                                    (std::ptr::null() as *const c_void)
-                                        .offset(offset_of!(Vertex, normal) as isize));
+            gl::VertexAttribPointer(
+                1,
+                3,
+                gl::FLOAT,
+                gl::FALSE as gl::types::GLboolean,
+                std::mem::size_of::<Vertex>() as gl::types::GLsizei,
+                (std::ptr::null() as *const c_void).offset(offset_of!(Vertex, normal) as isize),
+            );
 
             gl::EnableVertexAttribArray(2);
-            gl::VertexAttribPointer(2,
-                                    2,
-                                    gl::FLOAT,
-                                    gl::FALSE as gl::types::GLboolean,
-                                    std::mem::size_of::<Vertex>() as gl::types::GLsizei,
-                                    (std::ptr::null() as *const c_void)
-                                        .offset(offset_of!(Vertex, uv) as isize));
+            gl::VertexAttribPointer(
+                2,
+                2,
+                gl::FLOAT,
+                gl::FALSE as gl::types::GLboolean,
+                std::mem::size_of::<Vertex>() as gl::types::GLsizei,
+                (std::ptr::null() as *const c_void).offset(offset_of!(Vertex, uv) as isize),
+            );
 
             gl::BindVertexArray(0);
         }

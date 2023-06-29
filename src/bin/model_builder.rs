@@ -1,13 +1,13 @@
-extern crate grimoire;
+extern crate black_grimoire;
 
 use std::env::args;
-use std::path::Path;
 use std::fs::File;
+use std::path::Path;
 //use std::io::{Read, Write};
+use grimoire::renderer::Vertex;
+use grimoire::utilities::write_struct;
 use std::io::Read;
 use std::str::FromStr;
-use grimoire::utilities::write_struct;
-use grimoire::renderer::Vertex;
 
 fn main() {
     let mut args = args();
@@ -57,28 +57,35 @@ fn main() {
 
         if header_done == false {
             if words[0] == "element" && words[1] == "vertex" {
-
                 vertex_count = match usize::from_str(words[2]) {
                     Ok(n) => n,
                     Err(e) => panic!("Failed to get vertex count: {}!", e),
                 };
 
                 verticies.reserve_exact(vertex_count);
-            }
-            else if words[0] == "end_header" {
+            } else if words[0] == "end_header" {
                 header_done = true;
             }
         } else if vertecies_done == false {
-            let position = (f32::from_str(words[0]).unwrap(),
-                            f32::from_str(words[1]).unwrap(),
-                            f32::from_str(words[2]).unwrap()).into();
+            let position = (
+                f32::from_str(words[0]).unwrap(),
+                f32::from_str(words[1]).unwrap(),
+                f32::from_str(words[2]).unwrap(),
+            )
+                .into();
 
-            let normal = (f32::from_str(words[3]).unwrap(),
-                          f32::from_str(words[4]).unwrap(),
-                          f32::from_str(words[5]).unwrap()).into();
+            let normal = (
+                f32::from_str(words[3]).unwrap(),
+                f32::from_str(words[4]).unwrap(),
+                f32::from_str(words[5]).unwrap(),
+            )
+                .into();
 
-            let uv = (f32::from_str(words[6]).unwrap(),
-                      f32::from_str(words[7]).unwrap() * -1.0).into();
+            let uv = (
+                f32::from_str(words[6]).unwrap(),
+                f32::from_str(words[7]).unwrap() * -1.0,
+            )
+                .into();
 
             verticies.push(Vertex {
                 position,
@@ -107,7 +114,7 @@ fn main() {
         Err(e) => {
             eprintln!("Failed to create new model file: {}", e);
             return;
-        },
+        }
     }
 
     let mut vc = verticies.len() as u32;

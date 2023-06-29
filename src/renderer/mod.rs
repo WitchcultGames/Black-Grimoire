@@ -1,21 +1,21 @@
-mod shader_manager;
-mod model_manager;
-mod texture_manager;
 pub mod model;
+mod model_manager;
+mod shader_manager;
+mod texture_manager;
 
-use std;
-use std::collections::HashMap;
-use std::mem::size_of;
-use gl;
-use gl::types::{GLuint, GLint, GLsizei};
-use gamemath::Vec2;
-use gamemath::Vec3;
-use gamemath::Vec4;
-use gamemath::Mat4;
-use gamemath::Quat;
 use self::model::ModelInfo;
 use crate::light::Light;
 use core::ffi::c_void;
+use gamemath::Mat4;
+use gamemath::Quat;
+use gamemath::Vec2;
+use gamemath::Vec3;
+use gamemath::Vec4;
+use gl;
+use gl::types::{GLint, GLsizei, GLuint};
+use std;
+use std::collections::HashMap;
+use std::mem::size_of;
 
 static MAX_INSTANCES: usize = 10000;
 
@@ -136,19 +136,18 @@ impl Framebuffer {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.fbo);
 
-            gl::ClearColor(self.clear_color.x,
-                           self.clear_color.y,
-                           self.clear_color.z,
-                           self.clear_color.w);
+            gl::ClearColor(
+                self.clear_color.x,
+                self.clear_color.y,
+                self.clear_color.z,
+                self.clear_color.w,
+            );
 
             let attachments = [gl::COLOR_ATTACHMENT0];
             gl::DrawBuffers(1, attachments.as_ptr());
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            gl::ClearColor(0.0,
-                           0.0,
-                           0.0,
-                           1.0);
+            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
 
             let attachments = [gl::COLOR_ATTACHMENT1];
             gl::DrawBuffers(1, attachments.as_ptr());
@@ -156,19 +155,18 @@ impl Framebuffer {
 
             self.swap();
 
-            gl::ClearColor(self.clear_color.x,
-                           self.clear_color.y,
-                           self.clear_color.z,
-                           self.clear_color.w);
+            gl::ClearColor(
+                self.clear_color.x,
+                self.clear_color.y,
+                self.clear_color.z,
+                self.clear_color.w,
+            );
 
             let attachments = [gl::COLOR_ATTACHMENT0];
             gl::DrawBuffers(1, attachments.as_ptr());
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            gl::ClearColor(0.0,
-                           0.0,
-                           0.0,
-                           1.0);
+            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
 
             let attachments = [gl::COLOR_ATTACHMENT1];
             gl::DrawBuffers(1, attachments.as_ptr());
@@ -182,20 +180,23 @@ impl Framebuffer {
         self.current_front_buffer ^= self.current_back_buffer;
 
         unsafe {
-            gl::BindFramebuffer(gl::FRAMEBUFFER,
-                                self.fbo);
+            gl::BindFramebuffer(gl::FRAMEBUFFER, self.fbo);
 
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER,
-                                     gl::COLOR_ATTACHMENT0,
-                                     gl::TEXTURE_2D,
-                                     self.color_buffers[self.current_front_buffer].0,
-                                     0);
+            gl::FramebufferTexture2D(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT0,
+                gl::TEXTURE_2D,
+                self.color_buffers[self.current_front_buffer].0,
+                0,
+            );
 
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER,
-                                     gl::COLOR_ATTACHMENT1,
-                                     gl::TEXTURE_2D,
-                                     self.color_buffers[self.current_front_buffer].1,
-                                     0);
+            gl::FramebufferTexture2D(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT1,
+                gl::TEXTURE_2D,
+                self.color_buffers[self.current_front_buffer].1,
+                0,
+            );
         }
     }
 
@@ -213,72 +214,84 @@ impl Framebuffer {
             gl::GenTextures(4, &mut self.color_buffers[0].0);
 
             gl::BindTexture(gl::TEXTURE_2D, self.color_buffers[0].0);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           format.0,
-                           width,
-                           height,
-                           0,
-                           gl::RGBA as GLuint,
-                           format.1,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                format.0,
+                width,
+                height,
+                0,
+                gl::RGBA as GLuint,
+                format.1,
+                std::ptr::null(),
+            );
 
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
 
             gl::BindTexture(gl::TEXTURE_2D, self.color_buffers[0].1);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           format.0,
-                           width,
-                           height,
-                           0,
-                           gl::RGBA as GLuint,
-                           format.1,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                format.0,
+                width,
+                height,
+                0,
+                gl::RGBA as GLuint,
+                format.1,
+                std::ptr::null(),
+            );
 
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
 
             gl::BindTexture(gl::TEXTURE_2D, self.color_buffers[1].0);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           format.0,
-                           width,
-                           height,
-                           0,
-                           gl::RGBA as GLuint,
-                           format.1,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                format.0,
+                width,
+                height,
+                0,
+                gl::RGBA as GLuint,
+                format.1,
+                std::ptr::null(),
+            );
 
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
 
             gl::BindTexture(gl::TEXTURE_2D, self.color_buffers[1].1);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           format.0,
-                           width,
-                           height,
-                           0,
-                           gl::RGBA as GLuint,
-                           format.1,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                format.0,
+                width,
+                height,
+                0,
+                gl::RGBA as GLuint,
+                format.1,
+                std::ptr::null(),
+            );
 
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
 
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER,
-                                     gl::COLOR_ATTACHMENT0,
-                                     gl::TEXTURE_2D,
-                                     self.color_buffers[self.current_front_buffer].0,
-                                     0);
+            gl::FramebufferTexture2D(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT0,
+                gl::TEXTURE_2D,
+                self.color_buffers[self.current_front_buffer].0,
+                0,
+            );
 
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER,
-                                     gl::COLOR_ATTACHMENT1,
-                                     gl::TEXTURE_2D,
-                                     self.color_buffers[self.current_front_buffer].1,
-                                     0);
+            gl::FramebufferTexture2D(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT1,
+                gl::TEXTURE_2D,
+                self.color_buffers[self.current_front_buffer].1,
+                0,
+            );
 
             gl::DeleteRenderbuffers(1, &mut self.depth_buffer);
             gl::GenRenderbuffers(1, &mut self.depth_buffer);
@@ -286,7 +299,12 @@ impl Framebuffer {
             gl::RenderbufferStorage(gl::RENDERBUFFER, gl::DEPTH24_STENCIL8, width, height);
             gl::BindRenderbuffer(gl::RENDERBUFFER, 0);
 
-            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, gl::DEPTH_STENCIL_ATTACHMENT, gl::RENDERBUFFER, self.depth_buffer);
+            gl::FramebufferRenderbuffer(
+                gl::FRAMEBUFFER,
+                gl::DEPTH_STENCIL_ATTACHMENT,
+                gl::RENDERBUFFER,
+                self.depth_buffer,
+            );
 
             let r = gl::CheckFramebufferStatus(gl::FRAMEBUFFER);
 
@@ -299,17 +317,23 @@ impl Framebuffer {
 }
 
 impl<'a> Renderer<'a> {
-    pub fn new(window_size: Vec2<f32>,
-               render_target_size: Vec2<f32>,
-               shaders: &[(&'static str,
-                           &'static str,
-                           &'static str)]) -> Renderer<'a> {
+    pub fn new(
+        window_size: Vec2<f32>,
+        render_target_size: Vec2<f32>,
+        shaders: &[(&'static str, &'static str, &'static str)],
+    ) -> Renderer<'a> {
         let mut new_renderer = Renderer {
             shader_manager: shader_manager::ShaderManager::new(),
             model_manager: model_manager::ModelManager::new(),
             texture_manager: texture_manager::TextureManager::new(),
-            render_target_framebuffer: Framebuffer::new(render_target_size.x as GLint, render_target_size.y as GLint),
-            fullscreen_effect_framebuffer: Framebuffer::new(window_size.x as GLint, window_size.y as GLint),
+            render_target_framebuffer: Framebuffer::new(
+                render_target_size.x as GLint,
+                render_target_size.y as GLint,
+            ),
+            fullscreen_effect_framebuffer: Framebuffer::new(
+                window_size.x as GLint,
+                window_size.y as GLint,
+            ),
             viewport: (window_size, Vec2::new(0.0, 0.0)),
             job_vbo: 0,
             render_jobs: HashMap::new(),
@@ -322,17 +346,19 @@ impl<'a> Renderer<'a> {
             },
             light: Light {
                 position: (2.5, 0.5, 2.5).into(),
-                color: (1.0, 1.0, 1.0).into()
+                color: (1.0, 1.0, 1.0).into(),
             },
         };
 
         unsafe {
             gl::GenBuffers(1, &mut new_renderer.job_vbo);
             gl::BindBuffer(gl::ARRAY_BUFFER, new_renderer.job_vbo);
-            gl::BufferData(gl::ARRAY_BUFFER,
-                           (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
-                           std::ptr::null(),
-                           gl::STREAM_DRAW);
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
+                std::ptr::null(),
+                gl::STREAM_DRAW,
+            );
 
             gl::VertexAttribDivisor(0, 0);
             gl::VertexAttribDivisor(1, 0);
@@ -429,23 +455,27 @@ impl<'a> Renderer<'a> {
         }
     }
 
-    fn add_shader(&mut self,
-                  name: &'a str,
-                  vertex_src: &'static str,
-                  fragment_src: &'static str) {
+    fn add_shader(&mut self, name: &'a str, vertex_src: &'static str, fragment_src: &'static str) {
         unsafe {
-            self.shader_manager.create_program(name, vertex_src, fragment_src);
+            self.shader_manager
+                .create_program(name, vertex_src, fragment_src);
         }
 
-            self.render_jobs.insert(self.shader_manager.get_shader(name).unwrap(), HashMap::new());
+        self.render_jobs.insert(
+            self.shader_manager.get_shader(name).unwrap(),
+            HashMap::new(),
+        );
     }
 
-    fn add_model(&mut self,
-                 name: &'a str,
-                 render_mode: gl::types::GLenum,
-                 verticies: &[Vertex],
-                 indices: &[gl::types::GLuint]) {
-        self.model_manager.add_model(name, render_mode, verticies, indices);
+    fn add_model(
+        &mut self,
+        name: &'a str,
+        render_mode: gl::types::GLenum,
+        verticies: &[Vertex],
+        indices: &[gl::types::GLuint],
+    ) {
+        self.model_manager
+            .add_model(name, render_mode, verticies, indices);
 
         let model_info = self.model_manager.get_model(name).unwrap().1;
 
@@ -454,9 +484,7 @@ impl<'a> Renderer<'a> {
         }
     }
 
-    pub fn add_texture_set(&mut self,
-                           albedo: &'a str,
-                           emissive: &'a str) {
+    pub fn add_texture_set(&mut self, albedo: &'a str, emissive: &'a str) {
         let set = self.texture_manager.get_texture_set(albedo, emissive);
 
         for shader_jobs in self.render_jobs.values_mut() {
@@ -500,16 +528,17 @@ impl<'a> Renderer<'a> {
                 }
 
                 Some(m.1)
-            },
-            None => None
+            }
+            None => None,
         }
     }
 
-    pub fn set_skybox(&mut self,
-                       shader_name: &'a str,
-                       model_name: &'a str,
-                       cube_map_name: &'a str) {
-
+    pub fn set_skybox(
+        &mut self,
+        shader_name: &'a str,
+        model_name: &'a str,
+        cube_map_name: &'a str,
+    ) {
         let shader;
         let model;
         let cube_map;
@@ -519,7 +548,7 @@ impl<'a> Renderer<'a> {
             None => {
                 self.skybox = None;
                 return;
-            },
+            }
         };
 
         match self.model_manager.get_model(model_name) {
@@ -527,7 +556,7 @@ impl<'a> Renderer<'a> {
             None => {
                 self.skybox = None;
                 return;
-            },
+            }
         }
 
         match self.texture_manager.get_cube_map(cube_map_name) {
@@ -535,7 +564,7 @@ impl<'a> Renderer<'a> {
             None => {
                 self.skybox = None;
                 return;
-            },
+            }
         }
 
         self.skybox = Some(Skybox {
@@ -576,38 +605,34 @@ impl<'a> Renderer<'a> {
 
     pub fn add_render_job(&mut self, job: RenderJob) {
         match self.render_jobs.get_mut(&job.shader) {
-            Some(shader_jobs) => {
-                match shader_jobs.get_mut(&job.model.vao) {
-                    Some(model_jobs) => {
-                        match model_jobs.1.get_mut(&job.textures) {
-                            Some(texture_jobs) => {
-                                let r = job.rotation.normalized().extract_matrix().transposed();
-                                let mut p = Mat4::identity();
-                                let mut s = Mat4::identity();
-                                let mut t = Mat4::identity();
+            Some(shader_jobs) => match shader_jobs.get_mut(&job.model.vao) {
+                Some(model_jobs) => match model_jobs.1.get_mut(&job.textures) {
+                    Some(texture_jobs) => {
+                        let r = job.rotation.normalized().extract_matrix().transposed();
+                        let mut p = Mat4::identity();
+                        let mut s = Mat4::identity();
+                        let mut t = Mat4::identity();
 
-                                s.scale(job.scale);
-                                p.translate(job.pivot);
-                                t.translate(job.position);
+                        s.scale(job.scale);
+                        p.translate(job.pivot);
+                        t.translate(job.position);
 
-                                let mut m = s;
-                                m *= p;
-                                m *= r;
-                                m *= t;
+                        let mut m = s;
+                        m *= p;
+                        m *= r;
+                        m *= t;
 
-                                texture_jobs.push(InstanceBuffer {
-                                    model_matrix: m,
-                                    tint: job.tint,
-                                    emissive_tint: job.emissive_tint,
-                                    uv_size: job.uv_size,
-                                    uv_offset: job.uv_offset,
-                                });
-                            },
-                            None => (),
-                        }
-                    },
+                        texture_jobs.push(InstanceBuffer {
+                            model_matrix: m,
+                            tint: job.tint,
+                            emissive_tint: job.emissive_tint,
+                            uv_size: job.uv_size,
+                            uv_offset: job.uv_offset,
+                        });
+                    }
                     None => (),
-                }
+                },
+                None => (),
             },
             None => (),
         }
@@ -636,17 +661,15 @@ impl<'a> Renderer<'a> {
         self.window_size = new_size;
 
         unsafe {
-            self.fullscreen_effect_framebuffer.resize(self.viewport.0.x as GLint, self.viewport.0.y as GLint);
+            self.fullscreen_effect_framebuffer
+                .resize(self.viewport.0.x as GLint, self.viewport.0.y as GLint);
         }
     }
 
     unsafe fn clear_all_buffers(&mut self) {
         gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
 
-        gl::ClearColor(0.0,
-                       0.0,
-                       0.0,
-                       1.0);
+        gl::ClearColor(0.0, 0.0, 0.0, 1.0);
 
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
@@ -660,10 +683,12 @@ impl<'a> Renderer<'a> {
 
         self.clear_all_buffers();
         self.render_target_framebuffer.activate();
-        gl::Viewport(0,
-                     0,
-                     render_target_size.x as GLsizei,
-                     render_target_size.y as GLsizei);
+        gl::Viewport(
+            0,
+            0,
+            render_target_size.x as GLsizei,
+            render_target_size.y as GLsizei,
+        );
 
         match self.skybox {
             Some(ref sb) => {
@@ -677,25 +702,29 @@ impl<'a> Renderer<'a> {
 
                 self.shader_manager.activate_shader(sb.shader);
                 self.shader_manager.set_view_matrix(&view);
-                self.shader_manager.set_projection_matrix(&self.camera.projection);
+                self.shader_manager
+                    .set_projection_matrix(&self.camera.projection);
                 self.shader_manager.set_cube_map(sb.cube_map);
                 self.model_manager.set_model(sb.model.vao);
 
-                gl::DrawElements(sb.model.render_mode,
-                                 sb.model.index_count,
-                                 gl::UNSIGNED_INT,
-                                 std::ptr::null());
+                gl::DrawElements(
+                    sb.model.render_mode,
+                    sb.model.index_count,
+                    gl::UNSIGNED_INT,
+                    std::ptr::null(),
+                );
 
                 gl::CullFace(gl::BACK);
                 gl::DepthMask(gl::TRUE);
-            },
+            }
             None => (),
         }
 
         for (shader_id, shader_jobs) in self.render_jobs.iter_mut() {
             self.shader_manager.activate_shader(*shader_id);
             self.shader_manager.set_view_matrix(&self.camera.view);
-            self.shader_manager.set_projection_matrix(&self.camera.projection);
+            self.shader_manager
+                .set_projection_matrix(&self.camera.projection);
 
             for (model_id, model_jobs) in shader_jobs.iter_mut() {
                 self.model_manager.set_model(*model_id);
@@ -716,108 +745,142 @@ impl<'a> Renderer<'a> {
                         remaining_job_count -= job_count;
 
                         gl::BindBuffer(gl::ARRAY_BUFFER, self.job_vbo);
-                        gl::BufferData(gl::ARRAY_BUFFER,
-                                       (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
-                                       std::ptr::null(),
-                                       gl::STREAM_DRAW);
+                        gl::BufferData(
+                            gl::ARRAY_BUFFER,
+                            (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
+                            std::ptr::null(),
+                            gl::STREAM_DRAW,
+                        );
 
-                        gl::BufferSubData(gl::ARRAY_BUFFER,
-                                          0,
-                                          (job_count * size_of::<InstanceBuffer>()) as isize,
-                                          std::mem::transmute(&texture_jobs[batches_done * MAX_INSTANCES]));
+                        gl::BufferSubData(
+                            gl::ARRAY_BUFFER,
+                            0,
+                            (job_count * size_of::<InstanceBuffer>()) as isize,
+                            std::mem::transmute(&texture_jobs[batches_done * MAX_INSTANCES]),
+                        );
 
                         gl::EnableVertexAttribArray(3);
-                        gl::VertexAttribPointer(3,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                std::ptr::null());
+                        gl::VertexAttribPointer(
+                            3,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            std::ptr::null(),
+                        );
 
                         gl::EnableVertexAttribArray(4);
-                        gl::VertexAttribPointer(4,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset((size_of::<Vec4<f32>>()) as isize));
+                        gl::VertexAttribPointer(
+                            4,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void)
+                                .offset((size_of::<Vec4<f32>>()) as isize),
+                        );
 
                         gl::EnableVertexAttribArray(5);
-                        gl::VertexAttribPointer(5,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset((size_of::<Vec4<f32>>() * 2) as isize));
+                        gl::VertexAttribPointer(
+                            5,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void)
+                                .offset((size_of::<Vec4<f32>>() * 2) as isize),
+                        );
 
                         gl::EnableVertexAttribArray(6);
-                        gl::VertexAttribPointer(6,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset((size_of::<Vec4<f32>>() * 3) as isize));
+                        gl::VertexAttribPointer(
+                            6,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void)
+                                .offset((size_of::<Vec4<f32>>() * 3) as isize),
+                        );
 
                         gl::EnableVertexAttribArray(7);
-                        gl::VertexAttribPointer(7,
-                                                2,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset(offset_of!(InstanceBuffer, uv_size) as isize));
+                        gl::VertexAttribPointer(
+                            7,
+                            2,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void).offset(offset_of!(
+                                InstanceBuffer,
+                                uv_size
+                            )
+                                as isize),
+                        );
 
                         gl::EnableVertexAttribArray(8);
-                        gl::VertexAttribPointer(8,
-                                                2,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset(offset_of!(InstanceBuffer, uv_offset) as isize));
+                        gl::VertexAttribPointer(
+                            8,
+                            2,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void).offset(offset_of!(
+                                InstanceBuffer,
+                                uv_offset
+                            )
+                                as isize),
+                        );
 
                         gl::EnableVertexAttribArray(9);
-                        gl::VertexAttribPointer(9,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset(offset_of!(InstanceBuffer, tint) as isize));
+                        gl::VertexAttribPointer(
+                            9,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void).offset(offset_of!(
+                                InstanceBuffer,
+                                tint
+                            )
+                                as isize),
+                        );
 
                         gl::EnableVertexAttribArray(10);
-                        gl::VertexAttribPointer(10,
-                                                4,
-                                                gl::FLOAT,
-                                                gl::FALSE,
-                                                size_of::<InstanceBuffer>() as i32,
-                                                (std::ptr::null() as *const c_void)
-                                                    .offset(offset_of!(InstanceBuffer, emissive_tint) as isize));
+                        gl::VertexAttribPointer(
+                            10,
+                            4,
+                            gl::FLOAT,
+                            gl::FALSE,
+                            size_of::<InstanceBuffer>() as i32,
+                            (std::ptr::null() as *const c_void).offset(offset_of!(
+                                InstanceBuffer,
+                                emissive_tint
+                            )
+                                as isize),
+                        );
 
-                        gl::VertexAttribDivisor( 0, 0);
-                        gl::VertexAttribDivisor( 1, 0);
-                        gl::VertexAttribDivisor( 2, 0);
-                        gl::VertexAttribDivisor( 3, 1);
-                        gl::VertexAttribDivisor( 4, 1);
-                        gl::VertexAttribDivisor( 5, 1);
-                        gl::VertexAttribDivisor( 6, 1);
-                        gl::VertexAttribDivisor( 7, 1);
-                        gl::VertexAttribDivisor( 8, 1);
-                        gl::VertexAttribDivisor( 9, 1);
+                        gl::VertexAttribDivisor(0, 0);
+                        gl::VertexAttribDivisor(1, 0);
+                        gl::VertexAttribDivisor(2, 0);
+                        gl::VertexAttribDivisor(3, 1);
+                        gl::VertexAttribDivisor(4, 1);
+                        gl::VertexAttribDivisor(5, 1);
+                        gl::VertexAttribDivisor(6, 1);
+                        gl::VertexAttribDivisor(7, 1);
+                        gl::VertexAttribDivisor(8, 1);
+                        gl::VertexAttribDivisor(9, 1);
                         gl::VertexAttribDivisor(10, 1);
 
                         self.shader_manager.set_lights(&[self.light]);
 
                         let attachments = [gl::COLOR_ATTACHMENT0, gl::COLOR_ATTACHMENT1];
                         gl::DrawBuffers(2, attachments.as_ptr());
-                        gl::DrawElementsInstanced(model_info.render_mode,
-                                                  model_info.index_count,
-                                                  gl::UNSIGNED_INT,
-                                                  std::ptr::null(),
-                                                  job_count as i32);
+                        gl::DrawElementsInstanced(
+                            model_info.render_mode,
+                            model_info.index_count,
+                            gl::UNSIGNED_INT,
+                            std::ptr::null(),
+                            job_count as i32,
+                        );
 
                         batches_done += 1;
                         draw_call_count += 1;
@@ -829,10 +892,12 @@ impl<'a> Renderer<'a> {
         }
 
         self.fullscreen_effect_framebuffer.activate();
-        gl::Viewport(0,
-                     0,
-                     self.viewport.0.x as GLsizei,
-                     self.viewport.0.y as GLsizei);
+        gl::Viewport(
+            0,
+            0,
+            self.viewport.0.x as GLsizei,
+            self.viewport.0.y as GLsizei,
+        );
 
         let mut mat = Mat4::identity();
         let s = self.shader_manager.get_shader("copy").unwrap();
@@ -841,8 +906,10 @@ impl<'a> Renderer<'a> {
         self.shader_manager.activate_shader(s);
         self.shader_manager.set_view_matrix(&mat);
         self.shader_manager.set_projection_matrix(&mat);
-        self.shader_manager.set_albedo_texture(self.render_target_framebuffer.get_front_buffer().0);
-        self.shader_manager.set_emissive_texture(self.render_target_framebuffer.get_front_buffer().1);
+        self.shader_manager
+            .set_albedo_texture(self.render_target_framebuffer.get_front_buffer().0);
+        self.shader_manager
+            .set_emissive_texture(self.render_target_framebuffer.get_front_buffer().1);
         self.model_manager.set_model(m.1.vao);
 
         mat.translate(Vec3::new(-1.0, 1.0, 0.0));
@@ -856,86 +923,102 @@ impl<'a> Renderer<'a> {
         };
 
         gl::BindBuffer(gl::ARRAY_BUFFER, self.job_vbo);
-        gl::BufferData(gl::ARRAY_BUFFER,
-                       (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
-                       std::ptr::null(),
-                       gl::STREAM_DRAW);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
+            std::ptr::null(),
+            gl::STREAM_DRAW,
+        );
 
-        gl::BufferSubData(gl::ARRAY_BUFFER,
-                          0,
-                          size_of::<InstanceBuffer>() as isize,
-                          std::mem::transmute(&data));
+        gl::BufferSubData(
+            gl::ARRAY_BUFFER,
+            0,
+            size_of::<InstanceBuffer>() as isize,
+            std::mem::transmute(&data),
+        );
 
         gl::EnableVertexAttribArray(3);
-        gl::VertexAttribPointer(3,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                std::ptr::null());
+        gl::VertexAttribPointer(
+            3,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            std::ptr::null(),
+        );
 
         gl::EnableVertexAttribArray(4);
-        gl::VertexAttribPointer(4,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset((size_of::<Vec4<f32>>()) as isize));
+        gl::VertexAttribPointer(
+            4,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void).offset((size_of::<Vec4<f32>>()) as isize),
+        );
 
         gl::EnableVertexAttribArray(5);
-        gl::VertexAttribPointer(5,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset((size_of::<Vec4<f32>>() * 2) as isize));
+        gl::VertexAttribPointer(
+            5,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void).offset((size_of::<Vec4<f32>>() * 2) as isize),
+        );
 
         gl::EnableVertexAttribArray(6);
-        gl::VertexAttribPointer(6,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset((size_of::<Vec4<f32>>() * 3) as isize));
+        gl::VertexAttribPointer(
+            6,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void).offset((size_of::<Vec4<f32>>() * 3) as isize),
+        );
 
         gl::EnableVertexAttribArray(7);
-        gl::VertexAttribPointer(7,
-                                2,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset(offset_of!(InstanceBuffer, uv_size) as isize));
+        gl::VertexAttribPointer(
+            7,
+            2,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void)
+                .offset(offset_of!(InstanceBuffer, uv_size) as isize),
+        );
 
         gl::EnableVertexAttribArray(8);
-        gl::VertexAttribPointer(8,
-                                2,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset(offset_of!(InstanceBuffer, uv_offset) as isize));
+        gl::VertexAttribPointer(
+            8,
+            2,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void)
+                .offset(offset_of!(InstanceBuffer, uv_offset) as isize),
+        );
 
         gl::EnableVertexAttribArray(9);
-        gl::VertexAttribPointer(9,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset(offset_of!(InstanceBuffer, tint) as isize));
+        gl::VertexAttribPointer(
+            9,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void).offset(offset_of!(InstanceBuffer, tint) as isize),
+        );
 
         gl::EnableVertexAttribArray(10);
-        gl::VertexAttribPointer(10,
-                                4,
-                                gl::FLOAT,
-                                gl::FALSE,
-                                size_of::<InstanceBuffer>() as i32,
-                                (std::ptr::null() as *const c_void)
-                                    .offset(offset_of!(InstanceBuffer, emissive_tint) as isize));
+        gl::VertexAttribPointer(
+            10,
+            4,
+            gl::FLOAT,
+            gl::FALSE,
+            size_of::<InstanceBuffer>() as i32,
+            (std::ptr::null() as *const c_void)
+                .offset(offset_of!(InstanceBuffer, emissive_tint) as isize),
+        );
 
         gl::VertexAttribDivisor(0, 0);
         gl::VertexAttribDivisor(1, 0);
@@ -951,11 +1034,13 @@ impl<'a> Renderer<'a> {
 
         let attachments = [gl::COLOR_ATTACHMENT0, gl::COLOR_ATTACHMENT1];
         gl::DrawBuffers(2, attachments.as_ptr());
-        gl::DrawElementsInstanced(m.1.render_mode,
-                                  m.1.index_count,
-                                  gl::UNSIGNED_INT,
-                                  std::ptr::null(),
-                                  1);
+        gl::DrawElementsInstanced(
+            m.1.render_mode,
+            m.1.index_count,
+            gl::UNSIGNED_INT,
+            std::ptr::null(),
+            1,
+        );
 
         let mut mat = Mat4::identity();
 
@@ -966,15 +1051,18 @@ impl<'a> Renderer<'a> {
         self.shader_manager.activate_shader(s);
         self.shader_manager.set_view_matrix(&mat);
         self.shader_manager.set_projection_matrix(&mat);
-        self.shader_manager.set_emissive_texture(effect_back_buffer.1);
+        self.shader_manager
+            .set_emissive_texture(effect_back_buffer.1);
 
         let attachments = [gl::COLOR_ATTACHMENT1];
         gl::DrawBuffers(1, attachments.as_ptr());
-        gl::DrawElementsInstanced(m.1.render_mode,
-                                  m.1.index_count,
-                                  gl::UNSIGNED_INT,
-                                  std::ptr::null(),
-                                  1);
+        gl::DrawElementsInstanced(
+            m.1.render_mode,
+            m.1.index_count,
+            gl::UNSIGNED_INT,
+            std::ptr::null(),
+            1,
+        );
 
         self.fullscreen_effect_framebuffer.swap();
         let effect_back_buffer = self.fullscreen_effect_framebuffer.get_back_buffer();
@@ -983,29 +1071,36 @@ impl<'a> Renderer<'a> {
         self.shader_manager.activate_shader(s);
         self.shader_manager.set_view_matrix(&mat);
         self.shader_manager.set_projection_matrix(&mat);
-        self.shader_manager.set_emissive_texture(effect_back_buffer.1);
+        self.shader_manager
+            .set_emissive_texture(effect_back_buffer.1);
 
         let attachments = [gl::COLOR_ATTACHMENT1];
         gl::DrawBuffers(1, attachments.as_ptr());
-        gl::DrawElementsInstanced(m.1.render_mode,
-                                  m.1.index_count,
-                                  gl::UNSIGNED_INT,
-                                  std::ptr::null(),
-                                  1);
+        gl::DrawElementsInstanced(
+            m.1.render_mode,
+            m.1.index_count,
+            gl::UNSIGNED_INT,
+            std::ptr::null(),
+            1,
+        );
 
         gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
-        gl::Viewport(self.viewport.1.x as GLint,
-                     self.viewport.1.y as GLint,
-                     self.viewport.0.x as GLsizei,
-                     self.viewport.0.y as GLsizei);
+        gl::Viewport(
+            self.viewport.1.x as GLint,
+            self.viewport.1.y as GLint,
+            self.viewport.0.x as GLsizei,
+            self.viewport.0.y as GLsizei,
+        );
 
         let s = self.shader_manager.get_shader("add_emissive").unwrap();
 
         self.shader_manager.activate_shader(s);
         self.shader_manager.set_view_matrix(&mat);
         self.shader_manager.set_projection_matrix(&mat);
-        self.shader_manager.set_albedo_texture(self.fullscreen_effect_framebuffer.get_front_buffer().0);
-        self.shader_manager.set_emissive_texture(self.fullscreen_effect_framebuffer.get_front_buffer().1);
+        self.shader_manager
+            .set_albedo_texture(self.fullscreen_effect_framebuffer.get_front_buffer().0);
+        self.shader_manager
+            .set_emissive_texture(self.fullscreen_effect_framebuffer.get_front_buffer().1);
         self.model_manager.set_model(m.1.vao);
 
         mat.translate(Vec3::new(-1.0, 1.0, 0.0));
@@ -1019,20 +1114,26 @@ impl<'a> Renderer<'a> {
         };
 
         gl::BindBuffer(gl::ARRAY_BUFFER, self.job_vbo);
-        gl::BufferData(gl::ARRAY_BUFFER,
-                       (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
-                       std::ptr::null(),
-                       gl::STREAM_DRAW);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (MAX_INSTANCES * size_of::<InstanceBuffer>()) as isize,
+            std::ptr::null(),
+            gl::STREAM_DRAW,
+        );
 
-        gl::BufferSubData(gl::ARRAY_BUFFER,
-                          0,
-                          size_of::<InstanceBuffer>() as isize,
-                          std::mem::transmute(&data));
+        gl::BufferSubData(
+            gl::ARRAY_BUFFER,
+            0,
+            size_of::<InstanceBuffer>() as isize,
+            std::mem::transmute(&data),
+        );
 
-        gl::DrawElementsInstanced(m.1.render_mode,
-                                  m.1.index_count,
-                                  gl::UNSIGNED_INT,
-                                  std::ptr::null(),
-                                  1);
+        gl::DrawElementsInstanced(
+            m.1.render_mode,
+            m.1.index_count,
+            gl::UNSIGNED_INT,
+            std::ptr::null(),
+            1,
+        );
     }
 }

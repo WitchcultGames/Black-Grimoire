@@ -20,8 +20,10 @@ impl Entity {
     }
 
     fn new(index: u32, generation: u8) -> Entity {
-        Entity((index & ENTITY_INDEX_MASK) |
-               ((generation as u32 & ENTITY_GENERATION_MASK) << ENTITY_INDEX_BITS))
+        Entity(
+            (index & ENTITY_INDEX_MASK)
+                | ((generation as u32 & ENTITY_GENERATION_MASK) << ENTITY_INDEX_BITS),
+        )
     }
 
     fn index(&self) -> u32 {

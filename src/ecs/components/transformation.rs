@@ -1,7 +1,7 @@
-use fnv::FnvHashMap;
 use super::super::Entity;
-use gamemath::Vec3;
+use fnv::FnvHashMap;
 use gamemath::Quat;
+use gamemath::Vec3;
 
 pub struct TransformationData {
     owner: Entity,
@@ -84,15 +84,17 @@ impl TransformationSystem {
         }
     }
 
-    pub fn add_transformation_to_entity(&mut self,
-                                        entity: &Entity,
-                                        initial_transformation: TransformationBuilder) {
+    pub fn add_transformation_to_entity(
+        &mut self,
+        entity: &Entity,
+        initial_transformation: TransformationBuilder,
+    ) {
         match self.entity_has_transformation(entity) {
             true => (), //TODO: Add error logging/printing here!
             false => {
                 self.data.push(initial_transformation.build(*entity));
                 self.map.insert(entity.clone(), self.data.len() - 1);
-            },
+            }
         }
     }
 
@@ -109,7 +111,7 @@ impl TransformationSystem {
                     if self.data.is_empty() == false {
                         swapped = (true, *index);
                     }
-                },
+                }
                 None => (),
             }
         }
@@ -132,7 +134,7 @@ impl TransformationSystem {
             Some(index) => {
                 let r = self.data[*index].rotation.extract_matrix();
                 Some(r.get_forward_vector())
-            },
+            }
             None => None,
         }
     }
@@ -142,7 +144,7 @@ impl TransformationSystem {
             Some(index) => {
                 let r = self.data[*index].rotation.extract_matrix();
                 Some(r.get_right_vector())
-            },
+            }
             None => None,
         }
     }
@@ -172,7 +174,7 @@ impl TransformationSystem {
         match self.map.get(entity) {
             Some(index) => {
                 self.data[*index].rotation.rotate(angle, axis);
-            },
+            }
             None => (),
         }
     }
@@ -182,7 +184,7 @@ impl TransformationSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].rotation = rotation;
-                },
+                }
                 None => (),
             }
         }
@@ -193,7 +195,7 @@ impl TransformationSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].position = position;
-                },
+                }
                 None => (),
             }
         }
@@ -204,7 +206,7 @@ impl TransformationSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].scale = scale;
-                },
+                }
                 None => (),
             }
         }
@@ -215,7 +217,7 @@ impl TransformationSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].position += movement;
-                },
+                }
                 None => (),
             }
         }

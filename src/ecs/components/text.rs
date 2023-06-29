@@ -1,14 +1,13 @@
-
-use std::str::FromStr;
-use gl::types::GLuint;
-use fnv::FnvHashMap;
-use super::super::{Entity, EntityManager};
-use gamemath::Vec4;
-use gamemath::Vec3;
-use gamemath::Vec2;
-use super::super::super::renderer::{Renderer, RenderJob};
 use super::super::super::renderer::model::ModelInfo;
-use super::transformation::{TransformationSystem};
+use super::super::super::renderer::{RenderJob, Renderer};
+use super::super::{Entity, EntityManager};
+use super::transformation::TransformationSystem;
+use fnv::FnvHashMap;
+use gamemath::Vec2;
+use gamemath::Vec3;
+use gamemath::Vec4;
+use gl::types::GLuint;
+use std::str::FromStr;
 
 struct TextData {
     owner: Entity,
@@ -128,13 +127,12 @@ impl<'a> TextBuilder<'a> {
             text: match self.text {
                 Some(t) => t,
                 None => String::from_str("Text").unwrap(),
-            }
+            },
         };
 
         let sizes = renderer.get_texture_set_sizes(new_text.texture_set);
 
-        new_text.character_size = Vec2::new(sizes.0.x / 10.0,
-                                            sizes.0.y / 10.0);
+        new_text.character_size = Vec2::new(sizes.0.x / 10.0, sizes.0.y / 10.0);
 
         new_text.character_size = Vec2::new(6.0, 6.0);
 
@@ -150,11 +148,13 @@ impl<'a> TextSystem {
         }
     }
 
-    pub fn add_text_to_entity(&mut self,
-                                  entity: &Entity,
-                                  transformation_system: &TransformationSystem,
-                                  renderer: &mut Renderer<'a>,
-                                  initial_data: TextBuilder<'a>) {
+    pub fn add_text_to_entity(
+        &mut self,
+        entity: &Entity,
+        transformation_system: &TransformationSystem,
+        renderer: &mut Renderer<'a>,
+        initial_data: TextBuilder<'a>,
+    ) {
         match self.map.contains_key(entity) {
             true => (), //TODO: Add error logging/printing here!
             false => {
@@ -162,10 +162,10 @@ impl<'a> TextSystem {
                     true => {
                         self.data.push(initial_data.build(*entity, renderer));
                         self.map.insert(entity.clone(), self.data.len() - 1);
-                    },
+                    }
                     false => (), //TODO: Add error logging/printing here!
                 }
-            },
+            }
         }
     }
 
@@ -182,7 +182,7 @@ impl<'a> TextSystem {
                     if self.data.is_empty() == false {
                         swapped = (true, *index);
                     }
-                },
+                }
                 None => (),
             }
         }
@@ -205,7 +205,7 @@ impl<'a> TextSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].tint = color;
-                },
+                }
                 None => (),
             }
         }
@@ -216,19 +216,23 @@ impl<'a> TextSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].text = String::from_str(text).unwrap();
-                },
+                }
                 None => (),
             }
         }
     }
 
-    pub fn draw_all(&self,
-                    entity_manager: &EntityManager,
-                    transformation_system: &TransformationSystem,
-                    renderer: &mut Renderer) {
+    pub fn draw_all(
+        &self,
+        entity_manager: &EntityManager,
+        transformation_system: &TransformationSystem,
+        renderer: &mut Renderer,
+    ) {
         for text in self.data.iter() {
             if entity_manager.entity_is_active(&text.owner) == true {
-                let t = transformation_system.get_transformation_data(&text.owner).unwrap();
+                let t = transformation_system
+                    .get_transformation_data(&text.owner)
+                    .unwrap();
                 let uv_size = Vec2::new(0.1, 0.1);
                 let mut uv = Vec2::new(0.0, 0.0);
                 let mut character_position = t.position;
@@ -312,11 +316,11 @@ impl<'a> TextSystem {
                             character_position.x = t.position.x;
                             character_position.y -= text.character_size.y + 1.0;
                             continue;
-                        },
+                        }
                         ' ' => {
                             character_position.x += text.character_size.x * 2.0 + 2.0;
                             continue;
-                        },
+                        }
                         _ => continue,
                     }
 

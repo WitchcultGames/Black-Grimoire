@@ -1,7 +1,7 @@
-use std;
-use gl;
-use gamemath::Mat4;
 use crate::light::Light;
+use gamemath::Mat4;
+use gl;
+use std;
 use std::collections::hash_map::{HashMap, Values};
 
 pub struct ShaderData {
@@ -70,7 +70,10 @@ impl<'a> ShaderManager<'a> {
                 }
             }
 
-            println!("Could not set albedo texture, shader \'{}\' does not have the correct sampler!", key);
+            println!(
+                "Could not set albedo texture, shader \'{}\' does not have the correct sampler!",
+                key
+            );
         }
     }
 
@@ -89,15 +92,16 @@ impl<'a> ShaderManager<'a> {
                 }
             }
 
-            println!("Could not set emissive texture! shader \'{}\' does not have the correct sampler!", key);
+            println!(
+                "Could not set emissive texture! shader \'{}\' does not have the correct sampler!",
+                key
+            );
         }
     }
 
     pub unsafe fn set_cube_map(&mut self, texture: gl::types::GLuint) {
-        let loc = gl::GetUniformLocation(self.current_program.program,
-                                         std::ffi::CString::new("cube_map")
-                                             .unwrap()
-                                             .as_ptr());
+        let cube_map_c_str = std::ffi::CString::new("cube_map").unwrap();
+        let loc = gl::GetUniformLocation(self.current_program.program, cube_map_c_str.as_ptr());
 
         gl::ActiveTexture(gl::TEXTURE0 + 0);
         gl::BindTexture(gl::TEXTURE_CUBE_MAP, texture);
@@ -105,33 +109,26 @@ impl<'a> ShaderManager<'a> {
     }
 
     pub unsafe fn set_view_matrix(&mut self, matrix: &Mat4) {
-        let loc = gl::GetUniformLocation(self.current_program.program,
-                                         std::ffi::CString::new("view_matrix")
-                                             .unwrap()
-                                             .as_ptr());
+        let view_c_str = std::ffi::CString::new("view_matrix").unwrap();
+        let loc = gl::GetUniformLocation(self.current_program.program, view_c_str.as_ptr());
 
         gl::UniformMatrix4fv(loc, 1, gl::FALSE, std::mem::transmute(matrix));
     }
 
     pub unsafe fn set_projection_matrix(&mut self, matrix: &Mat4) {
-        let loc = gl::GetUniformLocation(self.current_program.program,
-                                         std::ffi::CString::new("projection_matrix")
-                                             .unwrap()
-                                             .as_ptr());
+        let proj_c_str = std::ffi::CString::new("projection_matrix").unwrap();
+        let loc = gl::GetUniformLocation(self.current_program.program, proj_c_str.as_ptr());
 
         gl::UniformMatrix4fv(loc, 1, gl::FALSE, std::mem::transmute(matrix));
     }
 
     pub unsafe fn set_lights(&mut self, lights: &[Light]) {
-        let count_loc = gl::GetUniformLocation(self.current_program.program,
-                                               std::ffi::CString::new("light_count")
-                                                   .unwrap()
-                                                   .as_ptr());
+        let light_count_c_str = std::ffi::CString::new("light_count").unwrap();
+        let count_loc =
+            gl::GetUniformLocation(self.current_program.program, light_count_c_str.as_ptr());
 
-        let light_loc = gl::GetUniformLocation(self.current_program.program,
-                                               std::ffi::CString::new("lights")
-                                                   .unwrap()
-                                                   .as_ptr());
+        let lights_c_str = std::ffi::CString::new("lights").unwrap();
+        let light_loc = gl::GetUniformLocation(self.current_program.program, lights_c_str.as_ptr());
 
         let count = lights.len().min(8) as i32;
 
@@ -139,29 +136,30 @@ impl<'a> ShaderManager<'a> {
         gl::Uniform3fv(light_loc, count * 2, std::mem::transmute(&lights[0]));
     }
 
-    pub unsafe fn create_program(&mut self,
-                      name: &'a str,
-                      vertex_src: &'static str,
-                      fragment_src: &'static str) {
+    pub unsafe fn create_program(
+        &mut self,
+        name: &'a str,
+        vertex_src: &'static str,
+        fragment_src: &'static str,
+    ) {
         let vs = self.compile_glsl(gl::VERTEX_SHADER, vertex_src);
         let fs = self.compile_glsl(gl::FRAGMENT_SHADER, fragment_src);
         let p = self.link_program(vs, fs);
 
-        let albedo_location = gl::GetUniformLocation(p,
-                                                     std::ffi::CString::new("albedo_texture")
-                                                         .unwrap()
-                                                         .as_ptr());
+        let albedo_c_str = std::ffi::CString::new("albedo_texture").unwrap();
+        let albedo_location = gl::GetUniformLocation(p, albedo_c_str.as_ptr());
 
-        let emissive_location = gl::GetUniformLocation(p,
-                                                       std::ffi::CString::new("emissive_texture")
-                                                           .unwrap()
-                                                           .as_ptr());
+        let emissive_c_str = std::ffi::CString::new("emissive_texture").unwrap();
+        let emissive_location = gl::GetUniformLocation(p, emissive_c_str.as_ptr());
 
-        self.programs.insert(name, ShaderData {
-            program: p,
-            albedo_location,
-            emissive_location,
-        });
+        self.programs.insert(
+            name,
+            ShaderData {
+                program: p,
+                albedo_location,
+                emissive_location,
+            },
+        );
     }
 
     pub unsafe fn clear_all_shaders(&mut self) {
@@ -176,12 +174,11 @@ impl<'a> ShaderManager<'a> {
         let shader;
 
         unsafe {
+            let c_str = std::ffi::CString::new(src.as_bytes()).unwrap();
+
             shader = gl::CreateShader(shader_type);
 
-            gl::ShaderSource(shader,
-                             1,
-                             &(std::ffi::CString::new(src.as_bytes()).unwrap()).as_ptr(),
-                             std::ptr::null());
+            gl::ShaderSource(shader, 1, &c_str.as_ptr(), std::ptr::null());
 
             gl::CompileShader(shader);
 
@@ -194,24 +191,30 @@ impl<'a> ShaderManager<'a> {
                 let mut buf = std::vec::Vec::with_capacity(len as usize);
                 buf.set_len((len as usize) - 1);
 
-                gl::GetShaderInfoLog(shader,
-                                     len,
-                                     std::ptr::null_mut(),
-                                     buf.as_mut_ptr() as *mut gl::types::GLchar);
+                gl::GetShaderInfoLog(
+                    shader,
+                    len,
+                    std::ptr::null_mut(),
+                    buf.as_mut_ptr() as *mut gl::types::GLchar,
+                );
 
-                panic!("{}",
-                       std::str::from_utf8(&buf)
-                           .ok()
-                           .expect("ShaderInfoLog not valid utf8!"));
+                panic!(
+                    "{}",
+                    std::str::from_utf8(&buf)
+                        .ok()
+                        .expect("ShaderInfoLog not valid utf8!")
+                );
             }
         }
 
         shader
     }
 
-    fn link_program(&self,
-                    vertex_shader: gl::types::GLuint,
-                    fragment_shader: gl::types::GLuint) -> gl::types::GLuint {
+    fn link_program(
+        &self,
+        vertex_shader: gl::types::GLuint,
+        fragment_shader: gl::types::GLuint,
+    ) -> gl::types::GLuint {
         unsafe {
             let program = gl::CreateProgram();
             gl::AttachShader(program, vertex_shader);
@@ -227,15 +230,19 @@ impl<'a> ShaderManager<'a> {
                 let mut buf = std::vec::Vec::with_capacity(len as usize);
                 buf.set_len((len as usize) - 1);
 
-                gl::GetProgramInfoLog(program,
-                                      len,
-                                      std::ptr::null_mut(),
-                                      buf.as_mut_ptr() as *mut gl::types::GLchar);
+                gl::GetProgramInfoLog(
+                    program,
+                    len,
+                    std::ptr::null_mut(),
+                    buf.as_mut_ptr() as *mut gl::types::GLchar,
+                );
 
-                panic!("{}",
-                       std::str::from_utf8(&buf)
-                           .ok()
-                           .expect("ProgramInfoLog not valid utf8!"));
+                panic!(
+                    "{}",
+                    std::str::from_utf8(&buf)
+                        .ok()
+                        .expect("ProgramInfoLog not valid utf8!")
+                );
             }
 
             program
@@ -245,6 +252,8 @@ impl<'a> ShaderManager<'a> {
 
 impl<'a> Drop for ShaderManager<'a> {
     fn drop(&mut self) {
-        unsafe { self.clear_all_shaders(); };
+        unsafe {
+            self.clear_all_shaders();
+        };
     }
 }

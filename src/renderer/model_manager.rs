@@ -1,11 +1,11 @@
-use std;
-use gl;
-use crate::renderer::Vertex;
 use crate::renderer::model::{Model, ModelInfo};
-use std::path::Path;
-use std::fs::File;
-use std::collections::hash_map::{HashMap, Values};
+use crate::renderer::Vertex;
 use crate::utilities::read_struct;
+use gl;
+use std;
+use std::collections::hash_map::{HashMap, Values};
+use std::fs::File;
+use std::path::Path;
 
 pub struct ModelManager<'a> {
     models: std::collections::HashMap<&'a str, Model>,
@@ -22,12 +22,15 @@ impl<'a> ModelManager<'a> {
         self.models.values()
     }
 
-    pub fn add_model(&mut self,
-                     name: &'a str,
-                     render_mode: gl::types::GLenum,
-                     verticies: &[Vertex],
-                     indices: &[gl::types::GLuint]) {
-        self.models.insert(name, Model::new(render_mode, verticies, indices));
+    pub fn add_model(
+        &mut self,
+        name: &'a str,
+        render_mode: gl::types::GLenum,
+        verticies: &[Vertex],
+        indices: &[gl::types::GLuint],
+    ) {
+        self.models
+            .insert(name, Model::new(render_mode, verticies, indices));
     }
 
     pub unsafe fn load_model(&mut self, name: &'a str) {
@@ -84,20 +87,22 @@ impl<'a> ModelManager<'a> {
         match model {
             Some(_m) => (),
             None => {
-                unsafe { self.load_model(name); };
+                unsafe {
+                    self.load_model(name);
+                };
 
                 match self.models.get(name) {
                     Some(m) => model = Some((true, m.get_info())),
                     None => model = None,
                 }
-            },
+            }
         }
 
         model
     }
 
     pub unsafe fn set_model(&self, model_vao: gl::types::GLuint) {
-            gl::BindVertexArray(model_vao);
+        gl::BindVertexArray(model_vao);
     }
 }
 

@@ -1,5 +1,5 @@
-use gameprng::xorshift128plus::XorShift128Plus;
 use gameprng::prng_traits::PrngAlgorithm;
+use gameprng::xorshift128plus::XorShift128Plus;
 
 pub struct Range {
     pub min: f32,

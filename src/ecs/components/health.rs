@@ -1,7 +1,6 @@
-
-use std::f32;
-use fnv::FnvHashMap;
 use super::super::{Entity, EntityManager};
+use fnv::FnvHashMap;
+use std::f32;
 
 struct HealthData {
     owner: Entity,
@@ -19,9 +18,7 @@ pub struct HealthBuilder {
 
 impl HealthBuilder {
     pub fn new() -> HealthBuilder {
-        HealthBuilder {
-            hitpoints: None,
-        }
+        HealthBuilder { hitpoints: None }
     }
 
     pub fn with_hitpoints(mut self, hitpoints: (f32, f32)) -> HealthBuilder {
@@ -55,7 +52,7 @@ impl HealthSystem {
                 false => {
                     self.data.push(initial_health.build(*entity));
                     self.map.insert(entity.clone(), self.data.len() - 1);
-                },
+                }
             }
         }
     }
@@ -73,7 +70,7 @@ impl HealthSystem {
                     if self.data.is_empty() == false {
                         swapped = (true, *index);
                     }
-                },
+                }
                 None => (),
             }
         }
@@ -92,7 +89,7 @@ impl HealthSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].hitpoints.0 += amount;
-                },
+                }
                 None => (),
             }
         }
@@ -103,7 +100,7 @@ impl HealthSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].hitpoints.0 -= amount;
-                },
+                }
                 None => (),
             }
         }
@@ -114,7 +111,7 @@ impl HealthSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].hitpoints.0 = f32::MIN;
-                },
+                }
                 None => (),
             }
         }

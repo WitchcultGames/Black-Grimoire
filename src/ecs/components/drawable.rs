@@ -1,12 +1,11 @@
-
-use gl::types::GLuint;
-use fnv::FnvHashMap;
-use super::super::{Entity, EntityManager};
-use gamemath::Vec4;
-use gamemath::Vec2;
-use super::super::super::renderer::{Renderer, RenderJob};
 use super::super::super::renderer::model::ModelInfo;
-use super::transformation::{TransformationSystem};
+use super::super::super::renderer::{RenderJob, Renderer};
+use super::super::{Entity, EntityManager};
+use super::transformation::TransformationSystem;
+use fnv::FnvHashMap;
+use gamemath::Vec2;
+use gamemath::Vec4;
+use gl::types::GLuint;
 
 struct DrawableData {
     owner: Entity,
@@ -125,11 +124,13 @@ impl<'a> DrawableSystem {
         }
     }
 
-    pub fn add_drawable_to_entity(&mut self,
-                                  entity: &Entity,
-                                  transformation_system: &TransformationSystem,
-                                  renderer: &mut Renderer<'a>,
-                                  initial_data: DrawableBuilder<'a>) {
+    pub fn add_drawable_to_entity(
+        &mut self,
+        entity: &Entity,
+        transformation_system: &TransformationSystem,
+        renderer: &mut Renderer<'a>,
+        initial_data: DrawableBuilder<'a>,
+    ) {
         match self.map.contains_key(entity) {
             true => (), //TODO: Add error logging/printing here!
             false => {
@@ -137,10 +138,10 @@ impl<'a> DrawableSystem {
                     true => {
                         self.data.push(initial_data.build(*entity, renderer));
                         self.map.insert(entity.clone(), self.data.len() - 1);
-                    },
+                    }
                     false => (), //TODO: Add error logging/printing here!
                 }
-            },
+            }
         }
     }
 
@@ -157,7 +158,7 @@ impl<'a> DrawableSystem {
                     if self.data.is_empty() == false {
                         swapped = (true, *index);
                     }
-                },
+                }
                 None => (),
             }
         }
@@ -180,19 +181,23 @@ impl<'a> DrawableSystem {
             match self.map.get(entity) {
                 Some(index) => {
                     self.data[*index].tint = color;
-                },
+                }
                 None => (),
             }
         }
     }
 
-    pub fn draw_all(&self,
-                    entity_manager: &EntityManager,
-                    transformation_system: &TransformationSystem,
-                    renderer: &mut Renderer) {
+    pub fn draw_all(
+        &self,
+        entity_manager: &EntityManager,
+        transformation_system: &TransformationSystem,
+        renderer: &mut Renderer,
+    ) {
         for drawable in self.data.iter() {
             if entity_manager.entity_is_active(&drawable.owner) == true {
-                let t = transformation_system.get_transformation_data(&drawable.owner).unwrap();
+                let t = transformation_system
+                    .get_transformation_data(&drawable.owner)
+                    .unwrap();
 
                 renderer.add_render_job(RenderJob {
                     model: drawable.model,

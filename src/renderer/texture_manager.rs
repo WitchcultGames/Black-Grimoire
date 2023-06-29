@@ -1,12 +1,12 @@
+extern crate libc;
 extern crate lodepng;
 extern crate rgb;
-extern crate libc;
 
-use std;
-use gl;
 use self::rgb::*;
-use std::collections::hash_map::{HashMap};
 use gamemath::Vec2;
+use gl;
+use std;
+use std::collections::hash_map::HashMap;
 
 pub struct TextureManager<'a> {
     textures: std::collections::HashMap<&'a str, (gl::types::GLuint, Vec2<f32>)>,
@@ -63,13 +63,13 @@ impl<'a> TextureManager<'a> {
         match texture {
             Some(_) => (),
             None => {
-                unsafe { self.load_texture(name); };
+                self.load_texture(name);
 
                 match self.textures.get(name) {
                     Some(t) => texture = Some((true, *t)),
                     None => texture = None,
                 }
-            },
+            }
         }
 
         texture
@@ -102,7 +102,6 @@ impl<'a> TextureManager<'a> {
         self.cube_maps.clear();
     }
 
-
     pub fn load_texture(&mut self, name: &'a str) {
         let image = match lodepng::decode32_file(name) {
             Err(_) => panic!("Failed to load png '{}'!", name),
@@ -114,24 +113,26 @@ impl<'a> TextureManager<'a> {
         unsafe {
             gl::GenTextures(1, &mut texture);
             gl::BindTexture(gl::TEXTURE_2D, texture);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           gl::RGBA as i32,
-                           image.width as i32,
-                           image.height as i32,
-                           0,
-                           gl::RGBA,
-                           gl::UNSIGNED_BYTE,
-                           std::mem::transmute(image.buffer
-                                                   .as_rgb()
-                                                   .as_bytes()
-                                                   .as_ptr()));
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                gl::RGBA as i32,
+                image.width as i32,
+                image.height as i32,
+                0,
+                gl::RGBA,
+                gl::UNSIGNED_BYTE,
+                std::mem::transmute(image.buffer.as_rgb().as_bytes().as_ptr()),
+            );
 
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
         }
 
-        self.textures.insert(name, (texture, Vec2::new(image.width as f32, image.height as f32)));
+        self.textures.insert(
+            name,
+            (texture, Vec2::new(image.width as f32, image.height as f32)),
+        );
     }
 
     pub fn get_texture_set(&mut self, albedo: &'a str, emissive: &'a str) -> (bool, usize) {
@@ -140,7 +141,7 @@ impl<'a> TextureManager<'a> {
 
         for (index, set) in self.texture_sets.iter().enumerate() {
             if set.0 == a.0 && set.1 == e.0 {
-                return (false, index)
+                return (false, index);
             }
         }
 
@@ -161,22 +162,29 @@ impl<'a> TextureManager<'a> {
                     Ok(i) => i,
                 };
 
-                gl::TexImage2D(gl::TEXTURE_CUBE_MAP_POSITIVE_X + i as gl::types::GLuint,
-                               0,
-                               gl::RGBA as i32,
-                               image.width as i32,
-                               image.height as i32,
-                               0,
-                               gl::RGBA,
-                               gl::UNSIGNED_BYTE,
-                               std::mem::transmute(image.buffer
-                                                       .as_rgb()
-                                                       .as_bytes()
-                                                       .as_ptr()));
+                gl::TexImage2D(
+                    gl::TEXTURE_CUBE_MAP_POSITIVE_X + i as gl::types::GLuint,
+                    0,
+                    gl::RGBA as i32,
+                    image.width as i32,
+                    image.height as i32,
+                    0,
+                    gl::RGBA,
+                    gl::UNSIGNED_BYTE,
+                    std::mem::transmute(image.buffer.as_rgb().as_bytes().as_ptr()),
+                );
             }
 
-            gl::TexParameteri(gl::TEXTURE_CUBE_MAP, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
-            gl::TexParameteri(gl::TEXTURE_CUBE_MAP, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
+            gl::TexParameteri(
+                gl::TEXTURE_CUBE_MAP,
+                gl::TEXTURE_MIN_FILTER,
+                gl::NEAREST as i32,
+            );
+            gl::TexParameteri(
+                gl::TEXTURE_CUBE_MAP,
+                gl::TEXTURE_MAG_FILTER,
+                gl::NEAREST as i32,
+            );
         }
 
         self.cube_maps.insert(name, texture);

@@ -1,13 +1,13 @@
-extern crate gl;
-extern crate glutin;
-extern crate fnv;
+pub extern crate fnv;
 pub extern crate gamemath;
 pub extern crate gameprng;
+pub extern crate gl;
+pub extern crate glutin;
 
 #[macro_use]
 pub mod utilities;
+pub mod ecs;
+pub mod light;
+pub mod range;
 pub mod renderer;
 pub mod timer;
-pub mod light;
-pub mod ecs;
-pub mod range;

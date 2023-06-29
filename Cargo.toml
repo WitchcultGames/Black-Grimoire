@@ -7,7 +7,7 @@ authors = ["David Bengtsson <david@witchcult.se>"]
 description = "A simple game engine"
 
 [lib]
-name = "grimoire"
+name = "black_grimoire"
 path = "src/lib.rs"
 
 [dependencies]
