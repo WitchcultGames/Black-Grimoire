@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["David Bengtsson <david@witchcult.se>"]
+description = "A simple game engine"
 
 [lib]
 name = "grimoire"
