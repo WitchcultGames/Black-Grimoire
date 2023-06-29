@@ -1,0 +1,19 @@
+[package]
+name = "grimoire"
+version = "0.1.0"
+edition = "2021"
+authors = ["David Bengtsson <david@witchcult.se>"]
+
+[lib]
+name = "grimoire"
+path = "src/lib.rs"
+
+[dependencies]
+rgb = "*"
+lodepng ="*"
+glutin = "*"
+gl = "*"
+libc = "*"
+fnv = "*"
+gameprng = "*"
+gamemath = "*"
