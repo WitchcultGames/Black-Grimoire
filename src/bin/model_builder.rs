@@ -4,8 +4,8 @@ use std::env::args;
 use std::fs::File;
 use std::path::Path;
 //use std::io::{Read, Write};
-use grimoire::renderer::Vertex;
-use grimoire::utilities::write_struct;
+use black_grimoire::renderer::Vertex;
+use black_grimoire::utilities::write_struct;
 use std::io::Read;
 use std::str::FromStr;
 
